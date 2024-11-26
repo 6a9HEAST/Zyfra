@@ -1,6 +1,7 @@
 ﻿using Lab2.Models;
 using Microsoft.AspNetCore.Mvc;
 using Lab2.Repositories;
+using System.Collections.Generic;
 
 namespace Lab2.Controllers
 {
@@ -8,9 +9,9 @@ namespace Lab2.Controllers
     [Route("api/data")]
     public class HomeController : ControllerBase
     {
-        private readonly Repository _repository;
+        private readonly IRepository _repository;
 
-        public HomeController(Repository repository)
+        public HomeController(IRepository repository)
         {
             _repository = repository;
         }
@@ -18,18 +19,18 @@ namespace Lab2.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Item>> GetAllData()
         {
-            return Ok(_repository.Items);
+            return Ok(_repository.GetItems());
         }
 
         [HttpPut("{id}")]
         public ActionResult UpdateData(int id, [FromBody] string newValue)
         {
-            var item = _repository.Items.FirstOrDefault(d => d.Id == id);
+            var item = _repository.GetItemById(id);
             if (item == null)
                 return NotFound();
 
             item.Value = newValue;
-            _repository.SaveDataToFile();
+            _repository.UpdateItem(item);
 
             Console.WriteLine($"Data updated: {id} = {newValue}");
             return NoContent();
